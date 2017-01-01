@@ -45,7 +45,7 @@ void Barrier::BarrierBlocking(){
 }
 
 bool Barrier::BarrierNonBlocking(barrier_cond_type bct){
-  // put here to work even if optimizing takes place
+  // put here to work even if optimization takes place
   mtx.lock();
   if(bct == MASTER){
     remain = 0;

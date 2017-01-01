@@ -87,6 +87,7 @@ bool TSXlist::insert(int val){
     search(val, win);
     if(win->found){
       delete newNode;
+      delete win;
       return false;
     }
 
@@ -97,6 +98,7 @@ bool TSXlist::insert(int val){
       if(win->prev->next == win->curr){
         win->prev->next = newNode;
         _xend();
+        delete win;
         return true;
       }
       _xabort(0xff);
@@ -107,7 +109,10 @@ bool TSXlist::contain(int val){
   Window* win = new Window();
   search(val,win);
 
-  return win->found;
+  bool found = win->found;
+  delete win;
+
+  return found;
 }
 bool TSXlist::remove(int val){
   Window* win = new Window();
@@ -115,6 +120,7 @@ bool TSXlist::remove(int val){
   while(true){
     search(val, win);
     if(!win->found){
+      delete win;
       return false;
     }
 
@@ -125,6 +131,7 @@ bool TSXlist::remove(int val){
         win->prev->next = win->succ;
         win->curr->next = head;
         _xend();
+        delete win;
         return true;
       }
       _xabort(0xff);
