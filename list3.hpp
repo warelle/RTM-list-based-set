@@ -1,7 +1,14 @@
 #include <limits>
 #include <immintrin.h>
+#include "split.hpp"
 
 namespace test{
+
+using namespace tmsplit;
+
+const int OP_SEARCH = 0;
+const int OP_INSERT = 1;
+const int OP_REMOVE = 2;
 
 struct Node{
   int value;
@@ -22,13 +29,15 @@ class TSXlist{
     Node* head;
     Node* tail;
 
+    TMsplit<3>* tmsplit;
+
     void search(int val, Window* &win);
 
   public:
     TSXlist();
     ~TSXlist();
 
-    void ThreadInit(){}
+    void ThreadInit();
 
     bool insert(int val);
     bool contain(int val);
@@ -44,6 +53,10 @@ TSXlist::TSXlist(){
   head->next = tail;
   tail->next = nullptr;
 
+  // tmp arg: #op
+  // 1st arg: #thread
+  tmsplit = new TMsplit<3>(4);
+
 //  // 0~99 initial list
 //  Node* runner = head;
 //  for(int i=0; i<100; i++){
@@ -56,6 +69,12 @@ TSXlist::TSXlist(){
 TSXlist::~TSXlist(){
   delete head;
   delete tail;
+
+  delete tmsplit;
+}
+
+void TSXlist::ThreadInit(){
+  tmsplit->ThreadRegister();
 }
 
 void TSXlist::search(int val, Window* &win){
@@ -63,6 +82,9 @@ void TSXlist::search(int val, Window* &win){
   Node* curr = nullptr;
 
 retry:;
+  tmsplit->Init(OP_SEARCH);
+  tmsplit->Start();
+
   prev = head;
   curr = head;
 
@@ -71,6 +93,7 @@ retry:;
     curr = prev->next;
 
     if(curr == nullptr){
+      tmsplit->Commit();
       goto retry;
     }
 
@@ -79,7 +102,10 @@ retry:;
     }
 
     prev = curr;
+
+    tmsplit->CheckPoint();
   }
+  tmsplit->Commit();
 
   win->curr = curr;
   if(curr->value == val){
@@ -104,15 +130,18 @@ bool TSXlist::insert(int val){
 
     newNode->next = win->curr;
 
-    auto status = _xbegin();
-    if(status == _XBEGIN_STARTED){
-      if(win->prev->next == win->curr){
-        win->prev->next = newNode;
-        _xend();
-        delete win;
-        return true;
-      }
-      _xabort(0xff);
+    tmsplit->Init(OP_INSERT);
+    tmsplit->Start();
+
+    if(win->prev->next == win->curr){
+      win->prev->next = newNode;
+      tmsplit->Commit();
+
+      delete win;
+      return true;
+    }else{
+      // failure
+      tmsplit->Commit();
     }
   }
 }
@@ -135,20 +164,22 @@ bool TSXlist::remove(int val){
       return false;
     }
 
-    auto status = _xbegin();
-    if(status == _XBEGIN_STARTED){
-      if(win->prev->next == win->curr
+    tmsplit->Init(OP_REMOVE);
+    tmsplit->Start();
+
+    if(win->prev->next == win->curr
         && win->curr->next == win->succ
         && win->succ != nullptr){
 
-        win->prev->next = win->succ;
-        win->curr->next = nullptr;
-        _xend();
+      win->prev->next = win->succ;
+      win->curr->next = nullptr;
 
-        delete win;
-        return true;
-      }
-      _xabort(0xff);
+      tmsplit->Commit();
+
+      delete win;
+      return true;
+    }else{
+      tmsplit->Commit();
     }
   }
 }

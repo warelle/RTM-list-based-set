@@ -6,6 +6,8 @@
 
 #ifdef L2
 #include "list2.hpp"
+#elif defined L3
+#include "list3.hpp"
 #else
 #include "list1.hpp"
 #endif
@@ -22,6 +24,8 @@ std::pair<int,int> removecounter[threadsnum];
 void run(int id, Barrier *sb, Barrier *eb, test::TSXlist *ls){
   const int keyrange = 100;
   Xorshift xs;
+
+  ls->ThreadInit();
 
   sb->BarrierBlocking();
   while(true){

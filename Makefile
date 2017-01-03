@@ -4,5 +4,8 @@ all: main.cpp
 l2: main.cpp
 	g++ -std=c++11 -O0 -g -DL2 -o main $^ -fgnu-tm -mrtm
 
+l3: main.cpp
+	g++ -std=c++11 -O0 -g -DL3 -o main $^ -fgnu-tm -mrtm
+
 clean:
 	rm main

@@ -28,6 +28,8 @@ class TSXlist{
     TSXlist();
     ~TSXlist();
 
+    void ThreadInit(){}
+
     bool insert(int val);
     bool contain(int val);
     bool remove(int val);

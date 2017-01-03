@@ -6,5 +6,8 @@
 	* this is needed because other transactions cannot detect the change of the field
 * list2.hpp
 	* next field of removed nodes is changed to nullptr
+* list3.hpp
+	* split each operation into segments
+	* no adaptation or tuning, so expected too slow
 * implementation might be correct
 	* not enough test, so possibly wrong
