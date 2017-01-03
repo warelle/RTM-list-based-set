@@ -3,7 +3,12 @@
 #include <thread>
 #include "barrier.hpp"
 #include "xorshift.hpp"
-#include "list.hpp"
+
+#ifdef L2
+#include "list2.hpp"
+#else
+#include "list1.hpp"
+#endif
 
 using namespace std;
 using namespace barrier;
@@ -53,7 +58,7 @@ void tf(){
 
   sb.BarrierBlocking();
 
-  std::this_thread::sleep_for(std::chrono::seconds(10));
+  std::this_thread::sleep_for(std::chrono::seconds(1));
 
   eb.BarrierNonBlocking(MASTER);
 
