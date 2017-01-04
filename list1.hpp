@@ -59,16 +59,25 @@ TSXlist::~TSXlist(){
 }
 
 void TSXlist::search(int val, Window* &win){
-  Node* prev = head;
+  Node* prev = nullptr;
   Node* curr = nullptr;
+
+retry:;
+  prev = head;
+  curr = head;
 
   win->found = false;
   while(curr != tail){
     curr = prev->next;
 
+    if(curr == nullptr){
+      goto retry;
+    }
+
     if(curr->value >= val){
       break;
     }
+
     prev = curr;
   }
 
@@ -129,10 +138,13 @@ bool TSXlist::remove(int val){
     auto status = _xbegin();
     if(status == _XBEGIN_STARTED){
       if(win->prev->next == win->curr
-        && win->curr->next == win->succ){
+        && win->curr->next == win->succ
+        && win->succ != nullptr){
+
         win->prev->next = win->succ;
-        win->curr->next = head;
+        win->curr->next = nullptr;
         _xend();
+
         delete win;
         return true;
       }

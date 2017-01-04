@@ -6,8 +6,6 @@
 
 #ifdef L2
 #include "list2.hpp"
-#elif defined L3
-#include "list3.hpp"
 #else
 #include "list1.hpp"
 #endif

@@ -1,12 +1,8 @@
 ## Note
 * No memory reclamation in code
 * list1.hpp
-	* one ad-hoc trick in program
-	* when removing a node, next field of the node is changed to point at head node
-	* this is needed because other transactions cannot detect the change of the field
-* list2.hpp
 	* next field of removed nodes is changed to nullptr
-* list3.hpp
+* list2.hpp
 	* split each operation into segments
 	* no adaptation or tuning, so expected too slow
 * implementation might be correct
